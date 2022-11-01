@@ -1,0 +1,36 @@
+.maindiv{
+    width:100%;
+}
+.navbar{
+    width:100%;
+    min-height:4vw;
+    background-color: slategray;
+    color:black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: medium;
+}
+.sidebar_main_div{
+    width:20%;
+    border:1px solid black;
+}
+
+.table_main_div{
+    width:70%;
+    border:1px solid black;
+    margin: auto;
+}
+
+.sideoptions{
+    display:flex; 
+    width:80%;
+    margin: auto;
+    justify-content: left;
+    align-items: center;
+    padding:1vw;
+}
+.pagecomponent{
+    width:100%;
+    display:flex;
+}
