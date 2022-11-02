@@ -13,12 +13,11 @@
 }
 .sidebar_main_div{
     width:20%;
-    border:1px solid black;
+    
 }
 
 .table_main_div{
     width:70%;
-    border:1px solid black;
     margin: auto;
 }
 
@@ -33,4 +32,23 @@
 .pagecomponent{
     width:100%;
     display:flex;
+}
+.listing_heading_div{
+ width:100%;
+ text-align: left;
+}
+.listing_heading_h1{
+    font-size:2vw;
+}
+.search_field_div{
+    display:flex;
+    justify-content: space-evenly;
+    margin-top:1vw;
+    margin-bottom:1vw;
+}
+.action_button{
+    width:70%;
+    display: flex;
+    justify-content: space-between;
+    margin-left: auto;
 }

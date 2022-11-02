@@ -1,91 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import FetchApiCustom from '../FetchApiCustom'
-import { DownOutlined } from '@ant-design/icons';
-import { Form, Radio, Space, Switch, Table ,Image} from 'antd';
-import { v4 as uuidv4 } from 'uuid';
-import {Button} from '@shopify/polaris';
+import {  Table } from 'antd';
+import {Button, Icon} from '@shopify/polaris';
+import { apiFilter, bodydata, columns } from './TableHeaders';
+import UpdatedComponent from '../hoc/UpdatedComponent';
+import { functionToCountBadge } from '../../redux/listingSlice';
+import {
+  MobileVerticalDotsMajor
+} from '@shopify/polaris-icons';
 
 
-export default function ProductTable(props) {
-    const [data , extractDataFromApi] = FetchApiCustom()
-  const [showfooter, setShowFooter] = useState(false);
-     const [dataSource , setDataSource]=useState([])
-    const appendparam=["","filter[cif_amazon_multi_inactive][1]=","filter[items.status][1]=","filter[items.status][1]=","filter[items.status][1]","filter[cif_amazon_multi_activity][1]=error&productOnly=true"]
-    const[bodydata , setBodydata]=useState({
-        type: "GET",
-        headers: {
-            appTag: "amazon_sales_channel",
-            Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1c2VyX2lkIjoiNjMzMjlkN2YwNDUxYzA3NGFhMGUxNWE4Iiwicm9sZSI6ImN1c3RvbWVyIiwiZXhwIjoxNjk4NzMxOTc2LCJpc3MiOiJodHRwczpcL1wvYXBwcy5jZWRjb21tZXJjZS5jb20iLCJ0b2tlbl9pZCI6IjYzNWY2NDQ4YzQxY2M2MjdhMzBjNmIyMiJ9.o0XvqNpmiAaXQgWC8LgaBrhx6Kjc6rwm0vi-aG-ezZHp3Ph1jcaBqKQq1u9PQSwiCjU6US8xiqMbN_l5JYEwmPOWWQF43Fdt8V2i_dYp2L4mj51rKn9pH7xCloNPAiqCAp7IlfdwXU2NL5cYlb8p4Ve9axRKuPaZ6FpEL49fP8zjlT5gsfR7lr5UD_iKmBH-F-R4ORgQC3vR0CfsW42XXebfTiKf5fh2qBAIrjtSPJyO0jgNxLCTppnT3ruBf3yDL7EcAOFXzUZn_G8NsOSaZp5AvMWIMDkpmBO0VvgkIqSuYOlICki6riprysfwhuwU1XAtpNwI6N571dfUTPhXsw",
-            "Ced-Source-Id": 500,
-            "Ced-Source-Name": "shopify",
-            "Ced-Target-Id": 530,
-            "Ced-Target-Name": "amazon" ,
-            appCode: "eyJzaG9waWZ5IjoiYW1hem9uX3NhbGVzX2NoYW5uZWwiLCJhbWF6b24iOiJhbWF6b24ifQ=="
-
-        },
-        payload:{
-            "source":{
-                "marketplace":"shopify",
-                "shopId":"507"
-            },
-            "target":{
-                "marketplace":"amazon",
-                "shopId":"509"
-            }  ,
-            "count":1  
-        }
-            
-})
-
-
-const columns = [
-    {
-      title: 'Image',
-      dataIndex: 'main_image',
-      key: 'Image',
-      render: (img) => <Image src={img} width={100} alt=""/>,
-      width:"10%"
-    },
-    {
-      title: 'Title',
-      dataIndex: 'Title',
-      key: 'Title',
-    },
-    {
-      title: 'Product Details',
-      dataIndex: 'Product Details',
-      key: 'Product Details',
-    },
-    {
-      title: 'Template',
-       dataIndex: 'Template',
-       key: 'Template',
-    },
-    {
-       title: 'Inventory',
-       dataIndex: 'Inventory',
-       key: 'Inventory',
-    },
-    {
-        title: 'Amazon Status',
-        dataIndex: 'Amazon Status',
-        key: 'Amazon Status',
-     },
-    {
-       title: 'Activity',
-       dataIndex: 'Activity',
-       key: 'Activity',
-    },
-    {
-       title: 'Actions',
-       dataIndex: 'Actions',
-       key: 'Actions',
-    },
+function ProductTable(props) {
+    const appendparam=["","filter[cif_amazon_multi_inactive][1]=","filter[items.status][1]=","filter[items.status][1]=","filter[items.status][1]","filter[cif_amazon_multi_activity][1]=error"]
+    const [extractDataFromApi] = FetchApiCustom()
+    const[data , setData]=useState()
+    const [dataSource , setDataSource]=useState([])
    
-  ];
 
- const findProductDetails=(item)=>{
-    if(item.items.length===1){
+ const findProductDetails=(item , flag)=>{
+    if(flag===0 && item.items.length===1){
         return <div>
         <p>Price:{item.items[0].price}</p>
         <p>Barcode:{item.items[0].barcode}</p>
@@ -93,41 +26,89 @@ const columns = [
         <p>ASIN:{item.items[0].asin?item.asin:""}</p>
       </div>
     }
-    if(item.items.length>1){
+    if(flag===0 && item.items.length>1){
         return <div>
         <p>SKU:{item.items[0].sku}</p>
         <p>ASIN:{item.items[0].asin?item.asin:""}</p>
       </div>
     }
+     if(flag===1){
+      return <div>
+      <p>Price:{item.price}</p>
+      <p>Barcode:{item.barcode}</p>
+      <p>SKU:{item.sku}</p>
+      <p>ASIN:{item.asin?item.asin:""}</p>
+    </div>
+     }
 }
 
- const findInventory=(d)=>{
+ const findInventory=(d , flag)=>{
     var quantity = 0;
-    if(d.items.length===1){
+    if(flag===0 && d.items.length===1){
         return <p>{d.items[0].quantity} in stock </p>
     }
-    if(d.items.length>1){
+    if( flag===0 && d.items.length>1){
         d.items.map((subItem)=>{
          quantity = quantity + subItem.quantity?subItem.quantity:0
         })
         return <p>{quantity} in stock for {d.items.length} variants</p>
     }
+    if(flag===1){
+      return <p>{d.quantity}</p>
+    }
  }
 
- const findAmazonStatus=(d)=>{
-  
-    if(d.items.length===1){
-        return <p>Not Listed</p>
+ const findAmazonStatus=(d , flag)=>{
+    if(flag===0 && d.items.length===1){
+          if(Object.keys(d.items[0]).includes('error')){
+            return<p>ERROR</p>
+          }
+          if(Object.keys(d.items[0]).includes('status')){
+            return<p>{d.items[0].status}</p>
+          }
+          else{
+            return<p>Not Listed</p>
+          }
+   
     }
+    if(flag===0 && d.items.length>1){
+      // console.log(d.items)
+      d.items.map((subItem)=>{
+        console.log(subItem)
+        if(Object.keys(subItem).includes('error') && Object.keys(subItem).includes('status')===-1){
+          return<p>Not Listed</p>
+        }
+        if(Object.keys(subItem).includes('error') && Object.keys(subItem).includes('status')){
+          return<p>ERROR</p>
+        }
+        if((Object.keys(subItem).includes('error')===-1) && Object.keys(subItem).includes('status')){
+          if(subItem.status==="Active" || subItem.status==="Inactive" || subItem.status==="Listed"){
+            return <p>Some are Listed</p>
+          }
+        }
 
-    if(d.items.length>1){
+      })
+     
         return <p>Not Listed</p>
     }
+    if(flag===1){
+      return <p>{d.status?d.status:"Not Listed"}</p>
+  }
  }
 
  const findChildren=(d)=>{
-    let t = { "Image":d.main_image, "Title":d.title , "Product Details":"" , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":"" , "Amazon Status":"" , "Activity":"" , "Actions":"" }
-    // console.log(d)
+  let temp=[];
+  d.items.map((subItem)=>{
+    if(d.container_id!==subItem.source_product_id){
+      let t = { "main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(subItem , 1) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(subItem , 1) , "Amazon Status":findAmazonStatus(subItem , 1) , "Activity":"" , "Actions":<Button><Icon
+      source={MobileVerticalDotsMajor}
+      color="base"
+    /></Button> ,"description":[]}
+      temp.push(t)
+    }
+  })
+   return temp;
+    
  }
 
 
@@ -136,11 +117,17 @@ const columns = [
     data && data.map((item)=>{
         item.data.rows.map((d)=>{
             if(d.type==="simple"){
-                let t = { "main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(d) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d) , "Amazon Status":findAmazonStatus(d) , "Activity":"--" , "Actions":<Button>:</Button> }
+                let t = { "key": d.source_product_id,"main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(d , 0) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d , 0) , "Amazon Status":findAmazonStatus(d , 0) , "Activity":"--" , "Actions":<Button><Icon
+                source={MobileVerticalDotsMajor}
+                color="base"
+              /></Button> ,"description":[]}
                 temp.push(t)
             }
             if(d.type==="variation"){
-                    let t = { "main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(d) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d)  , "Amazon Status":findAmazonStatus(d) , "Activity":"--" , "Actions":<Button>:</Button> ,children:findChildren(d)}
+                    let t = { "key": d.source_product_id ,"main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(d , 0) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d , 0)  , "Amazon Status":findAmazonStatus(d , 0) , "Activity":"--" , "Actions":<Button><Icon
+                    source={MobileVerticalDotsMajor}
+                    color="base"
+                  /></Button> ,"description":findChildren(d)}
                     temp.push(t)
                
             }
@@ -148,31 +135,48 @@ const columns = [
         setDataSource([...temp])
     })
   },[data])
-  const tableProps = {
-    footer:showfooter
-  }
-
-  
 
     useEffect(()=>{
-        var url = "https://multi-account.sellernext.com/home/public/connector/product/getRefineProducts?";
-        let temp = props.apifilter==="All"?"":props.apifilter
-        url = url + appendparam[Number(sessionStorage.getItem('tabindex'))] + temp 
-            extractDataFromApi(url , bodydata)
-    },[props.apifilter])
+      var url = "https://multi-account.sellernext.com/home/public/connector/product/getRefineProducts?";
+      url = url + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))]
+      extractDataFromApi(url , bodydata).then((res)=>{
+        if(res.success===true){
+          setData([res])
+        }
+      })
+    },[props])
 
     useEffect(()=>{
-        
-    },[data])
+      var url = "https://multi-account.sellernext.com/home/public/connector/product/getStatusWiseCount?";
+      url = url + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))] 
+      extractDataFromApi(url , bodydata).then((res)=>{
+        props.dispatch(functionToCountBadge(res))
+     })          
+   },[])
+
    
+
+ 
   return (
     <div>
-       <Table
-        {...tableProps}
+       <Table expandable={{
+        expandedRowRender:(record)=>(
+          <div style={{margin:0,
+          paddingLeft:"35px"
+        }}>
+          <Table columns={columns}
+          dataSource={record.description}
+          />
+        </div>
+        ) ,
+        rowExpandable:(record)=>record?.description?.length>0
+       }}
         columns={columns}
         dataSource={dataSource}
-       
+        scroll={{x:true}}
       />
     </div>
   )
 }
+
+export default UpdatedComponent(ProductTable)
