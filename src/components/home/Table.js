@@ -1,17 +1,21 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import styles from './Home.module.css';
 import { Button, Card, Tabs} from '@shopify/polaris';
 import {useState, useCallback} from 'react';
 import ProductTable from './ProductTable';
 import UpdatedComponent from '../hoc/UpdatedComponent';
 import { Badge } from 'antd';
-import {Autocomplete, Icon} from '@shopify/polaris';
+import {Autocomplete, Icon } from '@shopify/polaris';
 import {SearchMinor} from '@shopify/polaris-icons';
+import { functionToSearchvalue, functionToSetSelectedItem } from '../../redux/listingSlice';
 
 
 
  function Table(props) {
     const [selected, setSelected] = useState(0);
+
+    
+
     const handleTabChange = useCallback(
       (selectedTabIndex) => {
         setSelected(selectedTabIndex)
@@ -19,20 +23,17 @@ import {SearchMinor} from '@shopify/polaris-icons';
       },
       [],
     );
+
+    
     useEffect(()=>{
       setSelected(Number(sessionStorage.getItem('tabindex')))
     },[])
 
-    const deselectedOptions = useMemo(
-      () => [
-        {value: 'rustic', label: 'Rustic'},
-        {value: 'antique', label: 'Antique'},
-        {value: 'vinyl', label: 'Vinyl'},
-        {value: 'vintage', label: 'Vintage'},
-        {value: 'refurbished', label: 'Refurbished'},
-      ],
-      [],
-    );
+    const deselectedOptions = props.state.list.searchResultArray.map((item)=>{
+     return {label:<div className={styles.search_options_div}><div><img src = {item.main_image} style={{width:"50px"}} alt=""/></div><div><p>{item.title}</p><p>{"Brand:" +item.brand}</p></div></div> , value:item.container_id}
+    })
+    
+   
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [options, setOptions] = useState(deselectedOptions);
@@ -40,32 +41,21 @@ import {SearchMinor} from '@shopify/polaris-icons';
     const updateText = useCallback(
       (value) => {
         setInputValue(value);
+        props.dispatch(functionToSearchvalue(value))
   
         if (value === '') {
           setOptions(deselectedOptions);
           return;
         }
-  
-        const filterRegex = new RegExp(value, 'i');
-        const resultOptions = deselectedOptions.filter((option) =>
-          option.label.match(filterRegex),
-        );
-        setOptions(resultOptions);
+
       },
       [deselectedOptions],
     );
   
     const updateSelection = useCallback(
       (selected) => {
-        const selectedValue = selected.map((selectedItem) => {
-          const matchedOption = options.find((option) => {
-            return option.value.match(selectedItem);
-          });
-          return matchedOption && matchedOption.label;
-        });
-  
-        setSelectedOptions(selected);
-        setInputValue(selectedValue[0]);
+          
+           props.dispatch(functionToSetSelectedItem(selected[0]))
       },
       [options],
     );
@@ -131,7 +121,8 @@ import {SearchMinor} from '@shopify/polaris-icons';
         textField={textField}
       />
       <Button>More Filters</Button>
-      <Button>Actions</Button></div>
+      <Button>Actions</Button>
+      </div>
       <ProductTable apifilter={tabs[selected].content} check={1}/>
       
     </Card>
@@ -140,3 +131,5 @@ import {SearchMinor} from '@shopify/polaris-icons';
 }
 
 export default UpdatedComponent(Table)
+
+

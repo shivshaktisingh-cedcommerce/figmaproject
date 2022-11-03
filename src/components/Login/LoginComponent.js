@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback,  useState } from 'react'
 import {Card} from '@shopify/polaris';
 import {TextField} from '@shopify/polaris'
 import {Button} from '@shopify/polaris';
@@ -10,7 +10,7 @@ import UpdatedComponent from '../hoc/UpdatedComponent';
 const LoginComponent = (props) => {
     const [username, setUsername] = useState(''); //username is value of first textfield
     const [password, setPassword] = useState('');  //password is value of second textfield
-    const [data , extractDataFromApi] = fetchApiCustom()
+    const [extractDataFromApi] = fetchApiCustom()
     const navigate = useNavigate()
   
     const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJ1c2VyX2lkIjoiMSIsInJvbGUiOiJhcHAiLCJpYXQiOjE1MzkwNTk5NzgsImlzcyI6Imh0dHBzOlwvXC9hcHBzLmNlZGNvbW1lcmNlLmNvbSIsImF1ZCI6ImV4YW1wbGUuY29tIiwibmJmIjoxNTM5MDU5OTc4LCJ0b2tlbl9pZCI6MTUzOTA1OTk3OH0.GRSNBwvFrYe4H7FBkDISVee27fNfd1LiocugSntzxAUq_PIioj4-fDnuKYh-WHsTdIFMHIbtyt-uNI1uStVPJQ4K2oYrR_OmVe5_zW4fetHyFmoOuoulR1htZlX8pDXHeybRMYlkk95nKZZAYQDB0Lpq8gxnTCOSITTDES0Jbs9MENwZWVLfyZk6vkMhMoIAtETDXdElIdWjP6W_Q1kdzhwqatnUyzOBTdjd_pt9ZkbHHYnv6gUWiQV1bifWpMO5BYsSGR-MW3VzLqsH4QetZ-DC_AuF4W2FvdjMRpHrsCgqlDL4I4ZgHJVp-iXGfpug3sJKx_2AJ_2aT1k5sQYOMA";
@@ -31,18 +31,16 @@ const LoginComponent = (props) => {
             url+=`${key}=${value}&`
           }
           url = url.substring(0 , url.length-1)
-          extractDataFromApi(url , payload )
-    }
-    useEffect(()=>{
-       data && data.map((d)=>{
-        let tempObj = {username:username , password:password}
-            if(d.success===true){
+          extractDataFromApi(url , payload ).then((res)=>{
+            let tempObj={username:username , password:password}
+            if(res.success===true){
                 sessionStorage.setItem('userdata' , JSON.stringify(tempObj))   
                 props.dispatch(loginCredentialsFunction(tempObj))
                 navigate("/home")
             }
-        })
-    },[data])
+          })
+    }
+
 
   const handleChangeUsername = useCallback((newValue) => setUsername(newValue), []);
   const handleChangePassword = useCallback((newValue) => setPassword(newValue), []);
