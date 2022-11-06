@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 const UpdatedComponent=(Original)=> {
  
-    const NewComp=()=> {
+   const NewComp=()=> {
    const state = useSelector((state)=>state)
    const dispatch =useDispatch()
    

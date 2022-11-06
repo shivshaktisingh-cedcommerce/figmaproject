@@ -1,16 +1,16 @@
 import React from 'react'
-import Navbar from "./Navbar"
 import Sidebar from './Sidebar'
 import styles from './Home.module.css';
-import Table from './Table';
+import { Outlet } from 'react-router-dom';
+import Navbar from './navbar/Navbar';
 
 export default function Home() {
   return (
     <div>
       <Navbar/>
       <div className={styles.pagecomponent}>
-        <Sidebar />
-        <Table />
+        <div><Sidebar /></div>
+        <div><Outlet /></div>
       </div>
     </div>
   )

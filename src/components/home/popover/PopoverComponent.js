@@ -4,7 +4,7 @@ import {
   MobileVerticalDotsMajor
 } from '@shopify/polaris-icons';
 
-export default function PopoverComponent() {
+export default function PopoverComponent({status}) {
   const [popoverActive, setPopoverActive] = useState(false);
 
   const togglePopoverActive = useCallback(
@@ -12,6 +12,10 @@ export default function PopoverComponent() {
     [],
   );
 
+   const errorItem =[{content: 'Edit Product'}, {content:'Amazon Lookup'},{content: 'Sync Inventory'}, {content:'Sync Price'} , {content:'Sync Image'} ,{content:'Sync Product'} , {content:'Delete Product'}]
+   const notListedItem =[{content: 'Edit Product'}, {content:'Amazon Lookup'}]
+
+  // console.log(status.props.children)
   const activator = (
     <Button onClick={togglePopoverActive} >
      <Icon source={MobileVerticalDotsMajor}/>
@@ -27,7 +31,7 @@ export default function PopoverComponent() {
                   >
                     <ActionList
                       actionRole="menuitem"
-                      items={[{content: 'Edit Product'}, {content:'Amazon Lookup'}]}
+                      items={status.props.children==='ERROR'?errorItem:notListedItem}
                     />
                   </Popover>
                 </div>

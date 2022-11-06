@@ -1,29 +1,29 @@
 import React, {  useEffect, useState } from 'react'
-import FetchApiCustom from '../FetchApiCustom'
+import FetchApiCustom from '../customhook/FetchApiCustom'
 import {  Table } from 'antd';
-import {Popover} from '@shopify/polaris';
-import { apiFilter, bodydata, columns, target_marketplace } from './TableHeaders';
+import { apiFilter, bodydata, bodydata1, columns, itemsPerPage, target_marketplace } from '../../utils/AllUtilities';
 import UpdatedComponent from '../hoc/UpdatedComponent';
-import { functionToCountBadge, functionToSearchResultArray, functionToStoreDisplayedDataOnTable } from '../../redux/listingSlice';
-import PopoverComponent from './PopoverComponent';
+import { functionForProductsYetToBeLinked, functionToCountBadge, functionTogetTotalNoOfItems, functionToSearchResultArray, functionToSetNextOrPrevPageUrl, functionToStoreDisplayedDataOnTable } from '../../redux/listingSlice';
+import PopoverComponent from './popover/PopoverComponent';
+import PaginationComponent from './Pagination/PaginationComponent';
 
 
 function ProductTable(props) {
-    const appendparam=["","filter[cif_amazon_multi_inactive][1]=","filter[items.status][1]=","filter[items.status][1]=","filter[items.status][1]","filter[cif_amazon_multi_activity][1]=error"]
+    const appendparam=["","&filter[cif_amazon_multi_inactive][1]=","&filter[items.status][1]=","&filter[items.status][1]=","&filter[items.status][1]=","&filter[cif_amazon_multi_activity][1]="]
     const [extractDataFromApi] = FetchApiCustom()
-    const[data , setData]=useState()
+    const [data , setData]=useState()
     const [dataSource , setDataSource]=useState([])
     const [selectionType, setSelectionType] = useState('checkbox');
 
     const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
       },
       onSelect: (record, selected, selectedRows) => {
-        console.log(record, selected, selectedRows);
+        // console.log(record, selected, selectedRows);
       },
       onSelectAll: (selected, selectedRows, changeRows) => {
-        console.log(selected, selectedRows, changeRows);
+        // console.log(selected, selectedRows, changeRows);
       },
     };
    
@@ -110,7 +110,7 @@ function ProductTable(props) {
   let temp=[];
   d.items.map((subItem)=>{
     if(d.container_id!==subItem.source_product_id){
-      let t = { "main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(subItem , 1) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(subItem , 1) , "Amazon Status":findAmazonStatus(subItem , 1) , "Activity":"" , "Actions":<PopoverComponent/> ,"description":[]}
+      let t = { "main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(subItem , 1) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(subItem , 1) , "Amazon Status":findAmazonStatus(subItem , 1) , "Activity":"" , "Actions":<PopoverComponent status={findAmazonStatus(subItem , 1)}/> ,"description":[]}
       temp.push(t)
     }
   })
@@ -119,47 +119,39 @@ function ProductTable(props) {
  }
 
  const functionToCreateTable=()=>{
-
   let temp=[];
   data && data.map((item)=>{
       item.data.rows.map((d)=>{
-          if(d.type==="simple"){
-              let t = { "key": d.source_product_id,"main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(d , 0) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d , 0) , "Amazon Status":findAmazonStatus(d , 0) , "Activity":"--" , "Actions":<PopoverComponent/> ,"description":[]}
+          if(d.items.length===1){
+              let t = { "key": d.source_product_id,"main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(d , 0) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d , 0) , "Amazon Status":findAmazonStatus(d , 0) , "Activity":"--" , "Actions":<PopoverComponent status={findAmazonStatus(d , 0)}/> ,"description":[]}
               temp.push(t)
           }
-          if(d.type==="variation"){
-                  let t = { "key": d.source_product_id ,"main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(d , 0) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d , 0)  , "Amazon Status":findAmazonStatus(d , 0) , "Activity":"--" , "Actions":<PopoverComponent/> ,"description":findChildren(d)}
+          if(d.items.length>1){
+                  let t = { "key": d.source_product_id ,"main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(d , 0) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d , 0)  , "Amazon Status":findAmazonStatus(d , 0) , "Activity":"--" , "Actions":<PopoverComponent status={findAmazonStatus(d , 0)}/> ,"description":findChildren(d)}
                   temp.push(t)
-             
           }
       })
       setDataSource([...temp])
-      
   })
-
  }
+
  useEffect(()=>{
-  let tempArray = [];
-  
+  let tempArray = []; 
     if(props.state.list.searchResultArray.length>0){
        props.state.list.searchResultArray.map((item)=>{
-         if(item.container_id===props.state.list.selectedItem){
-         
+         if(item.container_id===props.state.list.selectedItem){       
           if(item.items.length===1){
-        let t = {"key": item.items[0].source_product_id,"main_image":item.items[0].main_image, "Title":item.items[0].title , "Product Details":findProductDetails(item , 0) , "Template":item.items[0].profile?item.items[0].profile.profile_name:"N/A" , "Inventory":findInventory(item , 0) , "Amazon Status":findAmazonStatus(item , 0) , "Activity":"--" , "Actions":<PopoverComponent/> ,"description":[]}
+        let t = {"key": item.items[0].source_product_id,"main_image":item.items[0].main_image, "Title":item.items[0].title , "Product Details":findProductDetails(item , 0) , "Template":item.items[0].profile?item.items[0].profile.profile_name:"N/A" , "Inventory":findInventory(item , 0) , "Amazon Status":findAmazonStatus(item , 0) , "Activity":"--" , "Actions":<PopoverComponent status={findAmazonStatus(item , 0)}/> ,"description":[]}
       tempArray.push(t)
            }
           if(item.items.length>1){
-            let t = { "key": item.items[0].source_product_id ,"main_image":item.items[0].main_image, "Title":item.items[0].title , "Product Details":findProductDetails(item , 0) , "Template":item.items[0].profile?item.items[0].profile.profile_name:"N/A" , "Inventory":findInventory(item , 0)  , "Amazon Status":findAmazonStatus(item , 0) , "Activity":"--" , "Actions":<PopoverComponent/> ,"description":findChildren(item)}
+            let t = { "key": item.items[0].source_product_id ,"main_image":item.items[0].main_image, "Title":item.items[0].title , "Product Details":findProductDetails(item , 0) , "Template":item.items[0].profile?item.items[0].profile.profile_name:"N/A" , "Inventory":findInventory(item , 0)  , "Amazon Status":findAmazonStatus(item , 0) , "Activity":"--" , "Actions":<PopoverComponent status={findAmazonStatus(item , 0)}/> ,"description":findChildren(item)}
           tempArray.push(t)
           }
-        
-         
          }
        })
     }
-    setDataSource([...tempArray])
-     
+    setDataSource([...tempArray])     
  },[props.state.list.selectedItem])
 
 
@@ -169,13 +161,36 @@ function ProductTable(props) {
 
     useEffect(()=>{
       var url = "https://multi-account.sellernext.com/home/public/connector/product/getRefineProducts?";
-      url = url + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))]
+      url = url+"count=" +itemsPerPage + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))] + "&target_marketplace="+target_marketplace
       extractDataFromApi(url , bodydata).then((res)=>{
         if(res.success===true){
+          props.dispatch(functionToSetNextOrPrevPageUrl({prev:res.data.prev , next:res.data.next}))
           setData([res])
         }
       })
-    },[sessionStorage.getItem('tabindex')])
+    },[props.state.list.tabIndex])
+
+    useEffect(()=>{
+      var url = "https://multi-account.sellernext.com/home/public/connector/product/getRefineProducts?";
+      if(props.state.list.nextOrPrevflag && props.state.list.nextPageUrl!==null){
+        url = url+"count=" +itemsPerPage + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))] + "&target_marketplace="+target_marketplace + "&next=" +props.state.list.nextPageUrl
+        extractDataFromApi(url , bodydata).then((res)=>{
+          if(res.success===true){
+            props.dispatch(functionToSetNextOrPrevPageUrl({prev:res.data.prev , next:res.data.next}))
+            setData([res])
+          }
+        })
+      }
+      if((!props.state.list.nextOrPrevflag) && props.state.list.previousPageUrl!==null){
+        url = url+"count=" +itemsPerPage + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))] + "&target_marketplace="+target_marketplace + "&prev=" +props.state.list.previousPageUrl
+        extractDataFromApi(url , bodydata).then((res)=>{
+          if(res.success===true){
+            props.dispatch(functionToSetNextOrPrevPageUrl({prev:res.data.prev , next:res.data.next}))
+            setData([res])
+          }
+        })
+      }
+    },[props.state.list.currentPage])
 
     useEffect(()=>{
       var url = "https://multi-account.sellernext.com/home/public/connector/product/getStatusWiseCount?";
@@ -183,7 +198,7 @@ function ProductTable(props) {
       extractDataFromApi(url , bodydata).then((res)=>{
         props.dispatch(functionToCountBadge(res))
      })          
-   },[])
+   },[props.state.list.tabIndex])
 
    useEffect(()=>{
               let url = "https://multi-account.sellernext.com/home/public/connector/product/getSearchSuggestions?";
@@ -199,12 +214,23 @@ function ProductTable(props) {
               })
    },[props.state.list.searchValue])
 
+  useEffect(()=>{
+  let url = "https://multi-account.sellernext.com/home/public/amazon/product/getMatchStatusCount";
+     extractDataFromApi(url , bodydata1).then((res)=>props.dispatch(functionForProductsYetToBeLinked(res.data.not_linked)))
+  },[])
+  
    useEffect(()=>{
      props.dispatch(functionToStoreDisplayedDataOnTable(dataSource))
    },[dataSource])
 
-   
-
+   useEffect(()=>{
+  let url = "https://multi-account.sellernext.com/home/public/connector/product/getRefineProductCount?"
+    url = url + "target_marketplace="+target_marketplace + appendparam[Number(sessionStorage.getItem('tabindex'))] +apiFilter[Number(sessionStorage.getItem('tabindex'))]
+    extractDataFromApi(url , bodydata).then((res)=>{
+    sessionStorage.setItem('storeTotalNoOfItems' , res.data.count)
+    props.dispatch(functionTogetTotalNoOfItems(res.data.count))
+  })
+   },[props.state.list.tabIndex])
  
   return (
     <div>
@@ -218,7 +244,9 @@ function ProductTable(props) {
           rowSelection={{
             type: selectionType,
             ...rowSelection,
+            
           }}
+          pagination={false}
           />
         </div>
         ) ,
@@ -231,8 +259,9 @@ function ProductTable(props) {
         columns={columns}
         dataSource={dataSource}
         scroll={{x:true}}
+        pagination={false}
       />
-      
+      <PaginationComponent />      
     </div>
   )
 }

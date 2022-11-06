@@ -7,18 +7,25 @@
     background-color: slategray;
     color:black;
     display: flex;
+    margin:auto;
     align-items: center;
     justify-content: center;
     font-size: medium;
 }
+.pagecomponent{
+    width:99%;
+    display:flex;
+   
+}
 .sidebar_main_div{
     width:20%;
+   
     
 }
 
 .table_main_div{
-    width:70%;
-    margin: auto;
+
+  
 }
 
 .sideoptions{
@@ -28,10 +35,6 @@
     justify-content: left;
     align-items: center;
     padding:1vw;
-}
-.pagecomponent{
-    width:100%;
-    display:flex;
 }
 .listing_heading_div{
  width:100%;
