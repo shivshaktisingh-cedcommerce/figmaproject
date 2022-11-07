@@ -15,14 +15,15 @@ export default function PopoverComponent({status}) {
    const errorItem =[{content: 'Edit Product'}, {content:'Amazon Lookup'},{content: 'Sync Inventory'}, {content:'Sync Price'} , {content:'Sync Image'} ,{content:'Sync Product'} , {content:'Delete Product'}]
    const notListedItem =[{content: 'Edit Product'}, {content:'Amazon Lookup'}]
 
-  // console.log(status.props.children)
+   
   const activator = (
     <Button onClick={togglePopoverActive} >
      <Icon source={MobileVerticalDotsMajor}/>
     </Button>
   );
+
   return (
-<div style={{height: '250px'}}>
+<div >
                   <Popover
                     active={popoverActive}
                     activator={activator}
@@ -31,7 +32,7 @@ export default function PopoverComponent({status}) {
                   >
                     <ActionList
                       actionRole="menuitem"
-                      items={status.props.children==='ERROR'?errorItem:notListedItem}
+                        items={status==='ERROR'?errorItem:notListedItem}
                     />
                   </Popover>
                 </div>

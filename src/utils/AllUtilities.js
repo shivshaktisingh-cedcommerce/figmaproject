@@ -4,6 +4,7 @@ export const loginPayload={ method:"GET" , headers:{Authorization:token}}
 export const target_marketplace = "eyJtYXJrZXRwbGFjZSI6ImFsbCIsInNob3BfaWQiOm51bGx9";
 export const apiFilter=["" , "Not Listed" , "Inactive" , "Incomplete" , "Active" , "error"]
 export const itemsPerPage = 50;
+export const dummyImage="https://multi-account.sellernext.com/apps/amazon-multi/fe687731855298b4807ee4a49c3bf27c.png";
 export const bodydata ={
     type: "GET",
     headers: {

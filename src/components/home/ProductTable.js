@@ -1,11 +1,17 @@
 import React, {  useEffect, useState } from 'react'
 import FetchApiCustom from '../customhook/FetchApiCustom'
 import {  Table } from 'antd';
-import { apiFilter, bodydata, bodydata1, columns, itemsPerPage, target_marketplace } from '../../utils/AllUtilities';
+import { apiFilter, bodydata, bodydata1, columns, dummyImage, itemsPerPage, target_marketplace } from '../../utils/AllUtilities';
 import UpdatedComponent from '../hoc/UpdatedComponent';
-import { functionForProductsYetToBeLinked, functionToCountBadge, functionTogetTotalNoOfItems, functionToSearchResultArray, functionToSetNextOrPrevPageUrl, functionToStoreDisplayedDataOnTable } from '../../redux/listingSlice';
+import {functionToSetInProgressFlag , functionForProductsYetToBeLinked, functionToCountBadge, functionTogetTotalNoOfItems, functionToSearchResultArray, functionToSetNextOrPrevPageUrl } from '../../redux/listingSlice';
 import PopoverComponent from './popover/PopoverComponent';
 import PaginationComponent from './Pagination/PaginationComponent';
+import {
+  ClockMinor
+} from '@shopify/polaris-icons';
+import { Badge, Button, Icon } from '@shopify/polaris';
+import ModalComponent from '../modal/ModalComponent';
+import ModalComponentForActivity from '../modal/ModalComponentForActivity';
 
 
 function ProductTable(props) {
@@ -53,6 +59,8 @@ function ProductTable(props) {
      }
 }
 
+
+
  const findInventory=(d , flag)=>{
     var quantity = 0;
     if(flag===0 && d.items.length===1){
@@ -69,65 +77,128 @@ function ProductTable(props) {
     }
  }
 
+
+ const findActivity =(item , flag)=>{
+  if(flag===0 && item.items.length===1 ){
+    if(Object.keys(item.items[0]).includes('process_tags')){
+        return <ModalComponentForActivity currentActivity={item.items[0]}/>
+      }
+      if(Object.keys(item.items[0]).includes('process_tags')===false){
+        return <p>--</p>
+      } 
+  }
+  if(flag===0 && item.items.length>1 ){
+    if(Object.keys(item.items[0]).includes('process_tags')){
+      return <ModalComponentForActivity currentActivity={item.items[0]}/>
+    }
+    if(Object.keys(item.items[0]).includes('process_tags')===false){
+      return <p>--</p>
+    } 
+  }
+  if(flag===1){ 
+    if(Object.keys(item).includes('process_tags')){
+      return <ModalComponentForActivity currentActivity={item}/>
+    }
+    if(Object.keys(item).includes('process_tags')===false){
+      return <p>--</p>
+    } 
+  }
+ }
+
  const findAmazonStatus=(d , flag)=>{
     if(flag===0 && d.items.length===1){
           if(Object.keys(d.items[0]).includes('error')){
-            return<p>ERROR</p>
+            return <><Badge status="critical">ERROR</Badge>
+            <ModalComponent errorReport={d.items[0]}/></>
+                  
           }
           if(Object.keys(d.items[0]).includes('status')){
-            return<p>{d.items[0].status}</p>
+            return<Badge status={d.items[0].status==="Active"?"Success":""}>{d.items[0].status}</Badge>
           }
-          else{
-            return<p>Not Listed</p>
+          if(Object.keys(d.items[0]).includes('status')===false){
+            return<Badge>Not Listed</Badge>
           }
    
     }
     if(flag===0 && d.items.length>1){
- 
-      d.items.map((subItem)=>{
-        if(Object.keys(subItem).includes('error') && Object.keys(subItem).includes('status')===-1){
-          return<p>Not Listed</p>
+    
+      for (const obj of d.items) {
+        if ("error" in obj) {
+          
+          return <><Badge status="critical">Error</Badge>
+           <ModalComponent errorReport={obj} />
+        </>
         }
-        if(Object.keys(subItem).includes('error') && Object.keys(subItem).includes('status')){
-          return<p>ERROR</p>
-        }
-        if((Object.keys(subItem).includes('error')===-1) && Object.keys(subItem).includes('status')){
-          if(subItem.status==="Active" || subItem.status==="Inactive" || subItem.status==="Listed"){
-            return <p>Some are Listed</p>
-          }
-        }
-
-      })
-     
-        return <p>Not Listed</p>
+      }     
     }
     if(flag===1){
-      return <p>{d.status?d.status:"Not Listed"}</p>
+      for (const obj of d.items) {
+        if ("error" in obj) {
+          return <><Badge status="critical">Error</Badge>
+             <ModalComponent errorReport={obj}/></>
+         
+        }
+      } 
   }
+ }
+
+ const findAction=(item , flag)=>{
+  if(flag===0 && item.items.length===1){
+    if(Object.keys(item.items[0]).includes('error')){
+      return <PopoverComponent status="ERROR" />
+            
+    }
+    if(Object.keys(item.items[0]).includes('status')){
+      return <PopoverComponent status="list" />
+    }
+    if(Object.keys(item.items[0]).includes('status')===false){
+      return<PopoverComponent status="list" />
+    }
+
+}
+if(flag===0 && item.items.length>1){
+
+for (const obj of item.items) {
+  if ("error" in obj) {
+    
+    return <PopoverComponent status= "ERROR"/>
+  }
+}     
+}
+if(flag===1){
+for (const obj of item.items) {
+  if ("error" in obj) {
+    return <PopoverComponent status ="ERROR"/>
+  }
+} 
+}
  }
 
  const findChildren=(d)=>{
   let temp=[];
   d.items.map((subItem)=>{
     if(d.container_id!==subItem.source_product_id){
-      let t = { "main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(subItem , 1) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(subItem , 1) , "Amazon Status":findAmazonStatus(subItem , 1) , "Activity":"" , "Actions":<PopoverComponent status={findAmazonStatus(subItem , 1)}/> ,"description":[]}
+      let t = { "main_image":d.main_image?d.main_image:dummyImage, "Title":d.title , "Product Details":findProductDetails(subItem , 1) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(subItem , 1) , "Amazon Status":findAmazonStatus(d , 1) , "Activity":findActivity(subItem , 1) , "Actions":findAction(d , 1) ,"description":[]}
       temp.push(t)
     }
   })
    return temp;
-    
  }
+
+ 
+
+
 
  const functionToCreateTable=()=>{
   let temp=[];
   data && data.map((item)=>{
       item.data.rows.map((d)=>{
           if(d.items.length===1){
-              let t = { "key": d.source_product_id,"main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(d , 0) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d , 0) , "Amazon Status":findAmazonStatus(d , 0) , "Activity":"--" , "Actions":<PopoverComponent status={findAmazonStatus(d , 0)}/> ,"description":[]}
+              let t = { "key": d.source_product_id,"main_image":d.main_image?d.main_image:dummyImage, "Title":d.title , "Product Details":findProductDetails(d , 0) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d , 0) , "Amazon Status":findAmazonStatus(d , 0) , "Activity":findActivity(d , 0) , "Actions":findAction(d , 0) ,"description":[]}
               temp.push(t)
           }
           if(d.items.length>1){
-                  let t = { "key": d.source_product_id ,"main_image":d.main_image, "Title":d.title , "Product Details":findProductDetails(d , 0) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d , 0)  , "Amazon Status":findAmazonStatus(d , 0) , "Activity":"--" , "Actions":<PopoverComponent status={findAmazonStatus(d , 0)}/> ,"description":findChildren(d)}
+                  let t = { "key": d.source_product_id ,"main_image":d.main_image?d.main_image:dummyImage, "Title":d.title , "Product Details":findProductDetails(d , 0) , "Template":d.profile?d.profile.profile_name:"N/A" , "Inventory":findInventory(d , 0)  , "Amazon Status":findAmazonStatus(d , 0) , "Activity":findActivity(d , 0) , "Actions":findAction(d , 0) ,"description":findChildren(d)}
                   temp.push(t)
           }
       })
@@ -141,11 +212,11 @@ function ProductTable(props) {
        props.state.list.searchResultArray.map((item)=>{
          if(item.container_id===props.state.list.selectedItem){       
           if(item.items.length===1){
-        let t = {"key": item.items[0].source_product_id,"main_image":item.items[0].main_image, "Title":item.items[0].title , "Product Details":findProductDetails(item , 0) , "Template":item.items[0].profile?item.items[0].profile.profile_name:"N/A" , "Inventory":findInventory(item , 0) , "Amazon Status":findAmazonStatus(item , 0) , "Activity":"--" , "Actions":<PopoverComponent status={findAmazonStatus(item , 0)}/> ,"description":[]}
+        let t = {"key": item.items[0].source_product_id,"main_image":item.items[0].main_image?item.items[0].main_image:dummyImage, "Title":item.items[0].title , "Product Details":findProductDetails(item , 0) , "Template":item.items[0].profile?item.items[0].profile.profile_name:"N/A" , "Inventory":findInventory(item , 0) , "Amazon Status":findAmazonStatus(item , 0) , "Activity":findActivity(item , 0), "Actions":findAction(item , 0) ,"description":[]}
       tempArray.push(t)
            }
           if(item.items.length>1){
-            let t = { "key": item.items[0].source_product_id ,"main_image":item.items[0].main_image, "Title":item.items[0].title , "Product Details":findProductDetails(item , 0) , "Template":item.items[0].profile?item.items[0].profile.profile_name:"N/A" , "Inventory":findInventory(item , 0)  , "Amazon Status":findAmazonStatus(item , 0) , "Activity":"--" , "Actions":<PopoverComponent status={findAmazonStatus(item , 0)}/> ,"description":findChildren(item)}
+            let t = { "key": item.items[0].source_product_id ,"main_image":item.items[0].main_image?item.items[0].main_image:dummyImage, "Title":item.items[0].title , "Product Details":findProductDetails(item , 0) , "Template":item.items[0].profile?item.items[0].profile.profile_name:"N/A" , "Inventory":findInventory(item , 0)  , "Amazon Status":findAmazonStatus(item , 0) , "Activity":findActivity(item , 0) , "Actions":findAction(item , 0) ,"description":findChildren(item)}
           tempArray.push(t)
           }
          }
@@ -219,9 +290,9 @@ function ProductTable(props) {
      extractDataFromApi(url , bodydata1).then((res)=>props.dispatch(functionForProductsYetToBeLinked(res.data.not_linked)))
   },[])
   
-   useEffect(()=>{
-     props.dispatch(functionToStoreDisplayedDataOnTable(dataSource))
-   },[dataSource])
+  //  useEffect(()=>{
+  //    props.dispatch(functionToStoreDisplayedDataOnTable(dataSource))
+  //  },[dataSource])
 
    useEffect(()=>{
   let url = "https://multi-account.sellernext.com/home/public/connector/product/getRefineProductCount?"
@@ -261,6 +332,7 @@ function ProductTable(props) {
         scroll={{x:true}}
         pagination={false}
       />
+      {/* <ModalComponent/> */}
       <PaginationComponent />      
     </div>
   )

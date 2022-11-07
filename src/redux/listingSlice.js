@@ -18,7 +18,8 @@ export const listSlice = createSlice({
        previousPageUrl:'',
        currentPage:1 ,
        nextOrPrevflag:true ,
-       productsYetToBeLinked:''
+       productsYetToBeLinked:'' ,
+       inProgressFlag:false
        
     } ,
     reducers:{
@@ -69,11 +70,14 @@ export const listSlice = createSlice({
         } ,
         functionToGetCurrentTabIndex:(state , action)=>{
           state.tabIndex = action.payload
+        } ,
+        functionToSetInProgressFlag:(state , action)=>{
+          state.inProgressFlag = action.payload
         }
       
     }
 
 })
 
-export const {functionToGetCurrentTabIndex , functionForProductsYetToBeLinked ,functionTriggeredOnNextButton , functionTriggeredOnPreviousButton , functionToSetNextOrPrevPageUrl ,loginCredentialsFunction ,functionToCountBadge , functionToSearchvalue , functionToSearchResultOptionArray ,  functionToSearchResultArray , functionToSetSelectedItem ,functionToStoreDisplayedDataOnTable , functionTogetTotalNoOfItems} = listSlice.actions
+export const {functionToSetInProgressFlag , functionToGetCurrentTabIndex , functionForProductsYetToBeLinked ,functionTriggeredOnNextButton , functionTriggeredOnPreviousButton , functionToSetNextOrPrevPageUrl ,loginCredentialsFunction ,functionToCountBadge , functionToSearchvalue , functionToSearchResultOptionArray ,  functionToSearchResultArray , functionToSetSelectedItem ,functionToStoreDisplayedDataOnTable , functionTogetTotalNoOfItems} = listSlice.actions
 export default listSlice.reducer

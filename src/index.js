@@ -5,13 +5,14 @@ import { AppProvider } from '@shopify/polaris';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import { BrowserRouter } from 'react-router-dom';
-import 'antd/dist/antd.css';
-import App from "./App"
+import 'antd/dist/antd.min.css';
+import App from "./App";
+import enTranslations from '@shopify/polaris/locales/en.json';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <AppProvider>
+  <AppProvider i18n={enTranslations}>
     <Provider store={store}>
       <BrowserRouter> 
         <App />

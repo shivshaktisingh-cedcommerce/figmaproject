@@ -7,12 +7,13 @@ import UpdatedComponent from '../../hoc/UpdatedComponent';
 import {Badge} from '@shopify/polaris';
 import BannerList from '../banner/BannerList';
 import SearchComponent from '../search/SearchComponent';
-import ButtonComponent from '../buttoncomponent/ButtonComponent';
 import { functionToGetCurrentTabIndex } from '../../../redux/listingSlice';
 import FilterOptions from '../../filtercomponents/Filter';
-import TagComponent from '../tags/RemovableTagComponent';
 import RemovableTagComponent from '../tags/RemovableTagComponent';
 import PopoverWithActionListExample from '../popover/ActionListPopOver';
+import ModalExampleSync from '../../modal/ModalComponentSync';
+import ModalExampleAmazon from '../../modal/ModalComponentAmazon';
+import PopoverWithActionListExampleBulkUpdate from '../popover/BulkUpdate';
 
 
 
@@ -70,9 +71,9 @@ import PopoverWithActionListExample from '../popover/ActionListPopOver';
         <div className={styles.search_field_div}>
           <SearchComponent/>
          <FilterOptions/>
-          <ButtonComponent btnValue="Sync Status"/>
-          <ButtonComponent btnValue="Amazon Lookup"/>
-          <ButtonComponent btnValue="Bulk Update"/>
+          <ModalExampleSync/>
+          <ModalExampleAmazon/>
+          <PopoverWithActionListExampleBulkUpdate/>
           <PopoverWithActionListExample/>
         </div>
         <RemovableTagComponent tagContent={tabs[selected].panelID}/>
