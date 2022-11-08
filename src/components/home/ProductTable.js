@@ -1,15 +1,13 @@
 import React, {  useEffect, useState } from 'react'
 import FetchApiCustom from '../customhook/FetchApiCustom'
 import {  Table } from 'antd';
-import { apiFilter, bodydata, bodydata1, columns, dummyImage, itemsPerPage, target_marketplace } from '../../utils/AllUtilities';
+import { apiFilter, bodydata, bodydata1, columns, dummyImage, dummyImage2, itemsPerPage, refineProductsUrl, target_marketplace } from '../../utils/AllUtilities';
 import UpdatedComponent from '../hoc/UpdatedComponent';
-import {functionToSetInProgressFlag , functionForProductsYetToBeLinked, functionToCountBadge, functionTogetTotalNoOfItems, functionToSearchResultArray, functionToSetNextOrPrevPageUrl } from '../../redux/listingSlice';
+import { functionForProductsYetToBeLinked, functionToCountBadge, functionTogetTotalNoOfItems, functionToSearchResultArray, functionToSetNextOrPrevPageUrl } from '../../redux/listingSlice';
 import PopoverComponent from './popover/PopoverComponent';
 import PaginationComponent from './Pagination/PaginationComponent';
-import {
-  ClockMinor
-} from '@shopify/polaris-icons';
-import { Badge, Button, Icon } from '@shopify/polaris';
+
+import { Badge } from '@shopify/polaris';
 import ModalComponent from '../modal/ModalComponent';
 import ModalComponentForActivity from '../modal/ModalComponentForActivity';
 
@@ -232,9 +230,26 @@ for (const obj of item.items) {
 
     useEffect(()=>{
       var url = "https://multi-account.sellernext.com/home/public/connector/product/getRefineProducts?";
-      url = url+"count=" +itemsPerPage + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))] + "&target_marketplace="+target_marketplace
+      if(sessionStorage.getItem('nextUrl')===null && sessionStorage.getItem('prevUrl')){
+        console.log("null")
+        url = url+"count=" +itemsPerPage + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))] + "&target_marketplace="+target_marketplace
+      }
+      if(sessionStorage.getItem('flagUrl')===false){
+        console.log("prev")
+        url = url+"count=" +itemsPerPage + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))] + "&target_marketplace="+target_marketplace + "prev="+sessionStorage.getItem('prevUrl')
+
+      }
+      if(sessionStorage.getItem('flagUrl')===true){
+        console.log("next")
+        url = url+"count=" +itemsPerPage + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))] + "&target_marketplace="+target_marketplace + "next="+sessionStorage.getItem('nextUrl')
+
+      }
+
       extractDataFromApi(url , bodydata).then((res)=>{
         if(res.success===true){
+          sessionStorage.setItem('nextUrl' , res.data.next)
+            sessionStorage.setItem('prevUrl' , res.data.prev)
+
           props.dispatch(functionToSetNextOrPrevPageUrl({prev:res.data.prev , next:res.data.next}))
           setData([res])
         }
@@ -247,6 +262,8 @@ for (const obj of item.items) {
         url = url+"count=" +itemsPerPage + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))] + "&target_marketplace="+target_marketplace + "&next=" +props.state.list.nextPageUrl
         extractDataFromApi(url , bodydata).then((res)=>{
           if(res.success===true){
+            sessionStorage.setItem('nextUrl' , res.data.next)
+            sessionStorage.setItem('prevUrl' , res.data.prev)
             props.dispatch(functionToSetNextOrPrevPageUrl({prev:res.data.prev , next:res.data.next}))
             setData([res])
           }
@@ -256,6 +273,8 @@ for (const obj of item.items) {
         url = url+"count=" +itemsPerPage + appendparam[Number(sessionStorage.getItem('tabindex'))] + apiFilter[Number(sessionStorage.getItem('tabindex'))] + "&target_marketplace="+target_marketplace + "&prev=" +props.state.list.previousPageUrl
         extractDataFromApi(url , bodydata).then((res)=>{
           if(res.success===true){
+            sessionStorage.setItem('nextUrl' , res.data.next)
+            sessionStorage.setItem('prevUrl' , res.data.prev)
             props.dispatch(functionToSetNextOrPrevPageUrl({prev:res.data.prev , next:res.data.next}))
             setData([res])
           }
@@ -289,10 +308,6 @@ for (const obj of item.items) {
   let url = "https://multi-account.sellernext.com/home/public/amazon/product/getMatchStatusCount";
      extractDataFromApi(url , bodydata1).then((res)=>props.dispatch(functionForProductsYetToBeLinked(res.data.not_linked)))
   },[])
-  
-  //  useEffect(()=>{
-  //    props.dispatch(functionToStoreDisplayedDataOnTable(dataSource))
-  //  },[dataSource])
 
    useEffect(()=>{
   let url = "https://multi-account.sellernext.com/home/public/connector/product/getRefineProductCount?"
@@ -302,10 +317,26 @@ for (const obj of item.items) {
     props.dispatch(functionTogetTotalNoOfItems(res.data.count))
   })
    },[props.state.list.tabIndex])
+
+   useEffect(()=>{
+    let x=""
+    props.state.filter.moreOptionsFilteredArray.map((item)=>{
+      if(item!==undefined){
+        x= x+ "filter["+item.value+"]["+item.selectValue+"]=" +item.textValue+"&"
+       }
+    })
+    x= x.substring(0, x.length-1);
+    let url = refineProductsUrl + x
+    extractDataFromApi(url , bodydata).then(res=>{
+      if(res.success===true){
+          setData([res])
+      }})
+
+   },[props.state.filter.moreOptionsFilteredArray])
  
   return (
     <div>
-       <Table expandable={{
+     { dataSource.length>0? <Table expandable={{
         expandedRowRender:(record)=>(
           <div style={{margin:0,
           paddingLeft:"35px"
@@ -331,9 +362,9 @@ for (const obj of item.items) {
         dataSource={dataSource}
         scroll={{x:true}}
         pagination={false}
-      />
-      {/* <ModalComponent/> */}
-      <PaginationComponent />      
+      />:<img src={dummyImage2} alt="" />}
+       
+     {dataSource.length>0 ?<PaginationComponent />:""}      
     </div>
   )
 }

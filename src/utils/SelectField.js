@@ -1,24 +1,23 @@
 import { Select } from "@shopify/polaris";
 import React, { useState } from "react";
-import { useDispatch} from "react-redux";
+import UpdatedComponent from "../components/hoc/UpdatedComponent";
 import { saveFilter } from "../redux/FilterSlice";
 
-const SelectField = ({ options, data }) => {
+const SelectField = (props) => {
   const [value, setValue] = useState(() => {
     let t = JSON.parse(sessionStorage.getItem("filter")) || {};
-    return t[data] || "";
+    return t[props.data] || "";
   });
 
-  const dispatch = useDispatch();
 
   const handelChange = (value) => {
     setValue(value);
     let t = JSON.parse(sessionStorage.getItem("filter")) || {};
-    t = { ...t, [data]: value };
+    t = { ...t, [props.data]: value };
     sessionStorage.setItem("filter", JSON.stringify(t));
-    dispatch(saveFilter());
+    props.dispatch(saveFilter());
   };
-  return <Select options={options} value={value} onChange={handelChange} />;
+  return <Select options={props.options} value={value} onChange={handelChange} />;
 };
 
-export default SelectField;
+export default UpdatedComponent(SelectField);

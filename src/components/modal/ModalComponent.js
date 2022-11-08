@@ -39,18 +39,24 @@ function ModalExample(props) {
   ];
   const [active, setActive] = useState(props.state.list.inProgressFlag);
   const handleChange = useCallback((index) => {
-    console.log(index)
     setActive(!active)
    }, [active]);
   
-  
+  //  console.log(props.errorReport)
     useEffect(()=>{
+    
       let temp =[]
-      temp.push(props.errorReport.error.product[0])
+      if(props.errorReport.error.product){
+        props.errorReport.error.product.map((item)=>{
+           temp.push(item)
+        })
+      }
+     
+      //  temp.push(props.errorReport.error.product[0])
       setProductError(temp)
       
 
-  },[props.errorReport])
+  },[active])
 
   const activator =  <Button plain onClick={handleChange}>View error</Button>;
     
@@ -73,9 +79,9 @@ function ModalExample(props) {
       <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}>
         <Card.Section>
          
-          {selected===0?<div><h2>Inventory</h2><p><Icon
+          {selected===0?<div><h2>Inventory</h2><p style={{display:"flex"}}><Icon
   source={RiskMinor}
-  color="error"
+  color="critical"
 />{productError[selected]}</p></div>:""}
         </Card.Section>
       </Tabs>

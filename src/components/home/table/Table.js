@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styles from "../Home.module.css";
 import {  Card, Tabs} from '@shopify/polaris';
 import {useState, useCallback} from 'react';
@@ -8,22 +8,28 @@ import {Badge} from '@shopify/polaris';
 import BannerList from '../banner/BannerList';
 import SearchComponent from '../search/SearchComponent';
 import { functionToGetCurrentTabIndex } from '../../../redux/listingSlice';
-import FilterOptions from '../../filtercomponents/Filter';
 import RemovableTagComponent from '../tags/RemovableTagComponent';
 import PopoverWithActionListExample from '../popover/ActionListPopOver';
 import ModalExampleSync from '../../modal/ModalComponentSync';
 import ModalExampleAmazon from '../../modal/ModalComponentAmazon';
 import PopoverWithActionListExampleBulkUpdate from '../popover/BulkUpdate';
+import FilterOptions from '../filtercomponents/FilterComponent.js';
+import { FilterData } from '../filtercomponents/AllFilterConstants';
+
 
 
 
  function Table(props) {
+
   const[selected , setSelected]=useState(props.state.list.tabIndex)
   const handleTabChange = useCallback((selectedTabIndex) => {
       setSelected(selectedTabIndex)
       sessionStorage.setItem('tabindex',selectedTabIndex)
       props.dispatch(functionToGetCurrentTabIndex(selectedTabIndex))
     },[],);
+    useEffect(()=>{
+      setSelected(props.state.list.tabIndex)
+    },[props.state.list.tabIndex])
 
       
     const tabs = [
@@ -59,18 +65,24 @@ import PopoverWithActionListExampleBulkUpdate from '../popover/BulkUpdate';
         },
       ];
 
+      const [allFilter , setAllFilter] = useState(FilterData)
+
+      useEffect(()=>{
+        sessionStorage.setItem('filter',JSON.stringify(allFilter))
+      },[allFilter])
+
   return (
     <div className={styles.table_main_div}>
      <div className={styles.listing_heading_div}>
       <p className={styles.listing_heading_h1}>Listings</p>
       <p>The section will enable you to manage all your listings of your active Amazon account. The feature helps you view the status of your listings along with performing actions like Bulk upload, running Sync Status, Amazon Lookup, or linking your unlinked Products by getting directed to the Product Linking section.</p>
      </div>
-     <BannerList/>
+     <div style={{width:"100%" , display:"flex",justifyContent:"center"}}><BannerList/></div>
       <Card>
         <Tabs tabs={tabs} selected={selected} onSelect={handleTabChange}></Tabs>
         <div className={styles.search_field_div}>
           <SearchComponent/>
-         <FilterOptions/>
+         <FilterOptions allFilter={allFilter} setAllFilter={setAllFilter}/>
           <ModalExampleSync/>
           <ModalExampleAmazon/>
           <PopoverWithActionListExampleBulkUpdate/>

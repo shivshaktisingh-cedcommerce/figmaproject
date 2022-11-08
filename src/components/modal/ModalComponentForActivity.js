@@ -22,9 +22,7 @@ function ModalExampleActivity(props) {
 useEffect(()=>{
     
     let temp = [...props.currentActivity.process_tags]
-    // console.log(temp)
     setInProgressArray(temp)
-//    console.log(props.currentActivity)
 },[props.currentActivity])
 
 
@@ -49,11 +47,8 @@ useEffect(()=>{
       >
         <Modal.Section>
           <TextContainer>
-           {inProgressArray.map((item)=>{
-            return <div><Icon
-            source={AnalyticsMinor}
-            color="base"
-          />{item}</div>
+           {inProgressArray.map((item , id)=>{
+            return <div style={{display:"flex" ,width:"40%"}} key={id}>{id+1+". "}{item}</div>
            })}
           </TextContainer>
         </Modal.Section>

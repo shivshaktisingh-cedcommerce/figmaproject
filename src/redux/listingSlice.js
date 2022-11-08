@@ -12,14 +12,15 @@ export const listSlice = createSlice({
        searchResultOptionArray:[] ,
        selectedItem:'' ,
        displayTableData:[] ,
-       totalNoOfItems:'',
-       totalNoOfPages:'' ,
+       totalNoOfItems:Number(sessionStorage.getItem('storeTotalNoOfItems')) ,
+       totalNoOfPages:Number(sessionStorage.getItem('totalNoOfPages'))  ,
        nextPageUrl:'' ,
        previousPageUrl:'',
-       currentPage:1 ,
+       currentPage:sessionStorage.getItem('currentPage')===null?1:Number(sessionStorage.getItem('currentPage')) ,
        nextOrPrevflag:true ,
        productsYetToBeLinked:'' ,
-       inProgressFlag:false
+       inProgressFlag:false ,
+     
        
     } ,
     reducers:{
@@ -54,30 +55,36 @@ export const listSlice = createSlice({
           state.totalNoOfPages = x
         } ,
         functionToSetNextOrPrevPageUrl:(state ,action)=>{
-          state.previousPageUrl=action.payload.prev
+          state.previousPageUrl = action.payload.prev
           state.nextPageUrl = action.payload.next
         } ,
         functionTriggeredOnPreviousButton:(state , action)=>{
-           state.currentPage = state.currentPage>1?state.currentPage - 1:1;
+           state.currentPage = action.payload
            state.nextOrPrevflag = false
+           sessionStorage.setItem('flagUrl' , false)
+
         } ,
         functionTriggeredOnNextButton:(state , action)=>{
-          state.currentPage = state.currentPage<state.totalNoOfPages?state.currentPage + 1:7 
+          state.currentPage = action.payload
           state.nextOrPrevflag = true
+          sessionStorage.setItem('flagUrl' , true)
         } ,
         functionForProductsYetToBeLinked:(state , action)=>{
           state.productsYetToBeLinked=action.payload
         } ,
         functionToGetCurrentTabIndex:(state , action)=>{
           state.tabIndex = action.payload
+          state.currentPage=1
         } ,
         functionToSetInProgressFlag:(state , action)=>{
           state.inProgressFlag = action.payload
-        }
+        } ,
+ 
+        
       
     }
 
 })
 
-export const {functionToSetInProgressFlag , functionToGetCurrentTabIndex , functionForProductsYetToBeLinked ,functionTriggeredOnNextButton , functionTriggeredOnPreviousButton , functionToSetNextOrPrevPageUrl ,loginCredentialsFunction ,functionToCountBadge , functionToSearchvalue , functionToSearchResultOptionArray ,  functionToSearchResultArray , functionToSetSelectedItem ,functionToStoreDisplayedDataOnTable , functionTogetTotalNoOfItems} = listSlice.actions
+export const { functionToSetInProgressFlag , functionToGetCurrentTabIndex , functionForProductsYetToBeLinked ,functionTriggeredOnNextButton , functionTriggeredOnPreviousButton , functionToSetNextOrPrevPageUrl ,loginCredentialsFunction ,functionToCountBadge , functionToSearchvalue , functionToSearchResultOptionArray ,  functionToSearchResultArray , functionToSetSelectedItem ,functionToStoreDisplayedDataOnTable , functionTogetTotalNoOfItems} = listSlice.actions
 export default listSlice.reducer

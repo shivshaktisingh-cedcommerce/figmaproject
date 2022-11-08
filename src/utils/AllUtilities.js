@@ -4,7 +4,9 @@ export const loginPayload={ method:"GET" , headers:{Authorization:token}}
 export const target_marketplace = "eyJtYXJrZXRwbGFjZSI6ImFsbCIsInNob3BfaWQiOm51bGx9";
 export const apiFilter=["" , "Not Listed" , "Inactive" , "Incomplete" , "Active" , "error"]
 export const itemsPerPage = 50;
+export const dummyImage2= "https://multi-account.sellernext.com/apps/amazon-multi/902e6225075f4dc2f9fe944f578a4ad2.png";
 export const dummyImage="https://multi-account.sellernext.com/apps/amazon-multi/fe687731855298b4807ee4a49c3bf27c.png";
+export const refineProductsUrl = "https://multi-account.sellernext.com/home/public/connector/product/getRefineProducts?";
 export const bodydata ={
     type: "GET",
     headers: {
@@ -105,7 +107,7 @@ export const columns = [
 
 
 
-export const filterHeaders = {
+export const filterHeader = {
   method : 'POST',
   headers : {
     "Ced-Source-Id": 476,
